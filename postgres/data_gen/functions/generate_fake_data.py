@@ -2,6 +2,7 @@ from faker import Faker
 import random
 from datetime import datetime
 
+#TODO turn it to converting csv to sql
 def generate_fake_data(num_contacts, num_groups, output_file):
     fake = Faker()
     with open(output_file, 'w') as f:
