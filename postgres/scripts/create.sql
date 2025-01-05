@@ -25,14 +25,13 @@ CREATE TABLE Contact_Groups (
 CREATE TABLE Calls (
     id SERIAL PRIMARY KEY,
     duration INT NOT NULL,
-    call_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (contact_id) REFERENCES Contacts(id) ON DELETE CASCADE
+    call_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE CALLS_USERS (
+CREATE TABLE Contacts_Calss (
     call_id INT NOT NULL,
     user_id INT NOT NULL,
     PRIMARY KEY (call_id, user_id),
     FOREIGN KEY (call_id) REFERENCES Calls(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES Contacts(id) ON DELETE CASCADE
 );

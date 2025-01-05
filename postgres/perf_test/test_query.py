@@ -1,7 +1,4 @@
 
-def test_postgres_queries():
-    pass
-
 def test_insert():
     pass
 
