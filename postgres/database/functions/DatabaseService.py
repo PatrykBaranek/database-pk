@@ -15,7 +15,7 @@ class DatabaseService:
         self.host = host
         self.port = port
 
-    def load_csv(self, set_number):
+    def load_csv(self, row_num):
         try:
             connection = psycopg2.connect(
                 dbname=self.dbname,
@@ -39,22 +39,22 @@ class DatabaseService:
                             counter = 0
                     connection.commit()
 
-            load_csv_to_db(f'../../../common/data/contacts{set_number}.csv', '''
+            load_csv_to_db(f'../../../common/data/contacts{row_num}.csv', '''
                 INSERT INTO contacts (id, first_name, last_name, email, phone_number, address, created_at)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
             ''')
 
-            load_csv_to_db(f'../../../common/data/groups{set_number}.csv', '''
+            load_csv_to_db(f'../../../common/data/groups{row_num}.csv', '''
                 INSERT INTO groups (id, name, created_at)
                 VALUES (%s, %s, %s)
             ''')
 
-            load_csv_to_db(f'../../../common/data/contact_groups{set_number}.csv', '''
+            load_csv_to_db(f'../../../common/data/contact_groups{row_num}.csv', '''
                 INSERT INTO contact_groups (contact_id, group_id)
                 VALUES (%s, %s)
             ''')
 
-            load_csv_to_db(f'../../../common/data/calls{set_number}.csv', '''
+            load_csv_to_db(f'../../../common/data/calls{row_num}.csv', '''
                 INSERT INTO calls (id, contact_id, duration, call_date)
                 VALUES (%s, %s, %s, %s)
             ''')
