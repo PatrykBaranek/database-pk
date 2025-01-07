@@ -1,0 +1,5 @@
+DROP TABLE IF EXISTS contact_groups;
+DROP TABLE IF EXISTS contacts_calls;
+DROP TABLE IF EXISTS calls;
+DROP TABLE IF EXISTS groups;
+DROP TABLE IF EXISTS contacts;

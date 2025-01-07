@@ -7,7 +7,8 @@ from mongo.perf_test.test_query import measure_mongo_times
 
 # ['insert', 'update', 'select_all', 'select_by_id', 'select_by_first_name', 'select_by_last_name', 'delete']
 def main():
-    postgres_service = PostgresExecutor('postgres', 'postgres', 'postgres', 'localhost', '5432')
+    postgres_service = PostgresExecutor('postgres', 'postgres', 'postgres', 'localhost', '5433')
+    postgres_service.drop_all()
     postgres_service.create_tables()
     postgres, postgres_w_idx = measure_postgres_times(postgres_service)
 
@@ -30,3 +31,6 @@ def main():
     plot_result(postgres_w_idx['select_by_first_name'], mongo_w_idx['select_by_first_name'], 'Postgres vs MongoDB with indexes select by first name')
     plot_result(postgres_w_idx['select_by_last_name'], mongo_w_idx['select_by_last_name'], 'Postgres vs MongoDB with indexes select by last name')
     plot_result(postgres_w_idx['delete'], mongo_w_idx['delete'], 'Postgres vs MongoDB with indexes delete')
+
+if __name__ == "__main__":
+    main()

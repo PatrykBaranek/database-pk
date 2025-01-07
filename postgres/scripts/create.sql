@@ -2,8 +2,8 @@ CREATE TABLE Contacts (
     id SERIAL PRIMARY KEY,
     first_name VARCHAR(255) NOT NULL,
     last_name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    phone_number VARCHAR(15),
+    email VARCHAR(255) NOT NULL,
+    phone_number VARCHAR(30),
     address TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -28,10 +28,10 @@ CREATE TABLE Calls (
     call_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE Contacts_Calss (
+CREATE TABLE Contacts_Calls (
     call_id INT NOT NULL,
-    user_id INT NOT NULL,
-    PRIMARY KEY (call_id, user_id),
+    contact_id INT NOT NULL,
+    PRIMARY KEY (call_id, contact_id),
     FOREIGN KEY (call_id) REFERENCES Calls(id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES Contacts(id) ON DELETE CASCADE
+    FOREIGN KEY (contact_id) REFERENCES Contacts(id) ON DELETE CASCADE
 );
