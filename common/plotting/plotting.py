@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 
+
 def plot_result(postgres_result, mongo_result, title):
     postgres_times, postgres_rows = zip(*postgres_result)
     mongo_times, mongo_rows = zip(*mongo_result)
@@ -20,4 +21,3 @@ def plot_result(postgres_result, mongo_result, title):
     ax.legend()
 
     plt.savefig(f'result/{title}.png')
-

@@ -1,9 +1,9 @@
 from datetime import datetime
 from faker import Faker
-from postgres.database.functions.DatabaseService import DatabaseService
-from pandas import DataFrame
+from postgres.database.postgres_executor import PostgresExecutor
 
-def test_insert(database_service: DatabaseService):
+
+def test_insert(database_service: PostgresExecutor):
     fake = Faker()
     first_name = fake.first_name()
     last_name = fake.last_name()
@@ -14,7 +14,7 @@ def test_insert(database_service: DatabaseService):
     return database_service.execute_query_with_timing(
         f"INSERT INTO contacts (first_name, last_name, email, phone_number, address, created_at) VALUES ('{first_name}', '{last_name}', '{email}', '{phone_number}', '{address}', '{created_at}')")
 
-def test_update(database_service: DatabaseService):
+def test_update(database_service: PostgresExecutor):
     fake = Faker()
     first_name = fake.first_name()
     last_name = fake.last_name()
@@ -25,11 +25,11 @@ def test_update(database_service: DatabaseService):
     return database_service.execute_query_with_timing(
         f"UPDATE contacts SET first_name = '{first_name}', last_name = '{last_name}', email = '{email}', phone_number = '{phone_number}', address = '{address}', created_at = '{created_at}' WHERE id = 1")
 
-def test_delete(database_service: DatabaseService, id: int):
+def test_delete(database_service: PostgresExecutor, id: int):
     return database_service.execute_query_with_timing(f"DELETE FROM contacts WHERE id = {id}")
 
 
-def measure_postgres_times(database_service: DatabaseService):
+def measure_postgres_times(database_service: PostgresExecutor):
     def perform_measurements(measurements, row_num):
         measurements['insert'].append((test_insert(database_service), row_num))
         measurements['update'].append((test_update(database_service), row_num))

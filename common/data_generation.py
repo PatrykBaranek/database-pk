@@ -5,14 +5,15 @@ from datetime import datetime
 import secrets
 import string
 
-def generate_fake_data(num_contacts, num_groups, num_calls):
+def generate_fake_data(num_contacts, num_groups, num_calls, file_num):
     fake = Faker()
+    print(f'generating file for {file_num}')
 
-    with open('data/contacts.csv', 'w', newline='') as contact_file, \
-         open('data/groups.csv', 'w', newline='') as group_file, \
-         open('data/contact_groups.csv', 'w', newline='') as contact_group_file, \
-         open('data/calls.csv', 'w', newline='') as call_file, \
-         open('data/contact_calls.csv', 'w', newline='') as call_contacts_file:
+    with open(f'data/contacts{file_num}.csv', 'w', newline='') as contact_file, \
+         open(f'data/groups{file_num}.csv', 'w', newline='') as group_file, \
+         open(f'data/contact_groups{file_num}.csv', 'w', newline='') as contact_group_file, \
+         open(f'data/calls{file_num}.csv', 'w', newline='') as call_file, \
+         open(f'data/contact_calls{file_num}.csv', 'w', newline='') as call_contacts_file:
 
         contacts_writer = csv.writer(contact_file)
         groups_writer = csv.writer(group_file)
@@ -46,7 +47,7 @@ def generate_fake_data(num_contacts, num_groups, num_calls):
 
             groups_writer.writerow([group_id, group_name_with_random_string, created_at])
 
-            num_contacts_in_group = random.randint(2, 50)
+            num_contacts_in_group = random.randint(2, 10)
             contact_ids = random.choices(range(1, num_contacts + 1), weights=contact_weights, k=num_contacts_in_group)
 
             for contact_id in contact_ids:
@@ -59,14 +60,36 @@ def generate_fake_data(num_contacts, num_groups, num_calls):
 
             call_writer.writerow([call_id, duration, call_date])
 
-            num_contacts_in_call = random.randint(2, 20)
+            num_contacts_in_call = random.randint(2, 6)
             contact_ids = random.choices(range(1, num_contacts + 1), k=num_contacts_in_call)
 
             for contact_id in contact_ids:
                 call_contacts_writer.writerow([contact_id, call_id])
 
+# generate_fake_data(
+#     1000,
+#     1000,
+#     1000,
+#     1000
+# )
+#
+# generate_fake_data(
+#     10000,
+#     10000,
+#     10000,
+#     10000
+# )
+#
+# generate_fake_data(
+#     50000,
+#     50000,
+#     50000,
+#     100000
+# )
+
 generate_fake_data(
-    1000,
-    1000,
-    1000
+    300000,
+    300000,
+    300000,
+    1000000
 )
