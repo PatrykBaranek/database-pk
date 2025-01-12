@@ -7,10 +7,10 @@ from mongo.perf_test.test_query import measure_mongo_times
 
 # ['insert', 'update', 'select_all', 'select_by_id', 'select_by_first_name', 'select_by_last_name', 'delete']
 def main():
-    postgres_service = PostgresExecutor('postgres', 'postgres', 'postgres', 'localhost', '5433')
-    postgres_service.drop_all()
-    postgres_service.create_tables()
-    postgres, postgres_w_idx = measure_postgres_times(postgres_service)
+    postgres_executor = PostgresExecutor('postgres', 'postgres', 'postgres', 'localhost', '5433')
+    postgres_executor.drop_all()
+    postgres_executor.create_tables()
+    postgres, postgres_w_idx = measure_postgres_times(postgres_executor)
 
     mongo_service = MongoDBExecutor('Performance', 'localhost', '27017')
     mongo_service.create_collections()
