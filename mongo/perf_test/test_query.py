@@ -3,10 +3,10 @@ from faker import Faker
 from mongo.database.mongodb_executor import MongoDBExecutor
 
 
-def test_insert(database_service: MongoDBExecutor):
+def test_insert_random_guest(database_service: MongoDBExecutor):
     fake = Faker()
     document = {
-        "first_name": fake.first_name(),
+        "first_name": fake.first_name() + " insert",
         "last_name": fake.last_name(),
         "email": fake.email(),
         "phone_number": fake.phone_number(),
@@ -15,104 +15,126 @@ def test_insert(database_service: MongoDBExecutor):
         "groups": [],
         "calls": []
     }
-    return database_service.execute_query_with_timing("contacts", document,'insert')
+    return database_service.execute_query_with_timing("contacts",
+        lambda coll: coll.insert_one(document))
 
-
-def test_update(database_service: MongoDBExecutor):
+def test_update_random_guest(database_service: MongoDBExecutor):
     fake = Faker()
     update_data = {
-        "first_name": fake.first_name(),
+        "first_name": fake.first_name() + " updated",
         "last_name": fake.last_name(),
         "email": fake.email(),
         "phone_number": fake.phone_number(),
         "address": fake.address(),
         "created_at": datetime.now()
     }
-    query = [
-        {"_id": "1"},
-        {"$set": update_data}
-    ]
-    return database_service.execute_query_with_timing(
-        "contacts",
-        query,
-        'update'
-    )
+    return database_service.execute_query_with_timing("contacts",
+        lambda coll: coll.update_one(
+            {"id": "20"}, # Empty filter to update first matching document
+            {"$set": update_data}
+        ))
+
+def test_delete_random_guest(database_service: MongoDBExecutor):
+    return database_service.execute_query_with_timing("contacts",
+        lambda coll: coll.delete_one({ "_id": "50" }))  # Empty filter to delete first matching document
+
+def test_select_calls_by_date(database_service: MongoDBExecutor):
+    return database_service.execute_query_with_timing("contacts",
+        lambda coll: coll.find({
+            "calls.date": datetime(2025, 1, 3)
+        }))
 
 
-def test_delete(database_service: MongoDBExecutor, id: str):
-    query = {"_id": str(id)}
-    return database_service.execute_query_with_timing(
-        "contacts",
-        query,
-        'delete'
-    )
+def test_select_calls_by_participants(database_service: MongoDBExecutor):
+    return database_service.execute_query_with_timing("contacts",
+        lambda coll: coll.find({
+            "calls.participants": {"$size": {"$gt": 5}}
+        }))
 
+
+def test_select_groups_with_john(database_service: MongoDBExecutor):
+    return database_service.execute_query_with_timing("contacts",
+        lambda coll: coll.find({
+            "first_name": "John"
+        }))
+
+
+def test_select_phone_plus_one(database_service: MongoDBExecutor):
+    return database_service.execute_query_with_timing("contacts",
+        lambda coll: coll.find({
+            "phone_number": {"$regex": "^\\+1"}
+        }))
+
+
+def test_select_email_org(database_service: MongoDBExecutor):
+    return database_service.execute_query_with_timing("contacts",
+        lambda coll: coll.find({
+            "email": {"$regex": "org$"}
+        }))
+
+
+def test_select_phone_plus_one_limit(database_service: MongoDBExecutor):
+    return database_service.execute_query_with_timing("contacts",
+        lambda coll: coll.find({
+            "phone_number": {"$regex": "^\\+1"}
+        }).limit(5))
+
+
+def test_select_email_org_limit(database_service: MongoDBExecutor):
+    return database_service.execute_query_with_timing("contacts",
+        lambda coll: coll.find({
+            "email": {"$regex": "org$"}
+        }).limit(5))
 
 def measure_mongo_times(database_service: MongoDBExecutor):
     def perform_measurements(measurements, row_num):
-        # Insert test
+        # CRUD operations
         measurements['insert'].append(
-            (test_insert(database_service), row_num)
+            (test_insert_random_guest(database_service), row_num)
         )
-
-        # Update test
         measurements['update'].append(
-            (test_update(database_service), row_num)
+            (test_update_random_guest(database_service), row_num)
         )
-
-        # Select all test
-        measurements['select_all'].append(
-            (database_service.execute_query_with_timing(
-                "contacts",
-                {},
-                'find'
-            ), row_num)
-        )
-
-        # Select by id test
-        measurements['select_by_id'].append(
-            (database_service.execute_query_with_timing(
-                "contacts",
-                {"_id": "1"},
-                'find'
-            ), row_num)
-        )
-
-        # Select by first name test
-        measurements['select_by_first_name'].append(
-            (database_service.execute_query_with_timing(
-                "contacts",
-                {"first_name": "John"},
-                'find'
-            ), row_num)
-        )
-
-        # Select by last name test
-        measurements['select_by_last_name'].append(
-            (database_service.execute_query_with_timing(
-                "contacts",
-                {"last_name": "Doe"},
-                'find'
-            ), row_num)
-        )
-
-        # Delete test
         measurements['delete'].append(
-            (test_delete(database_service, str(row_num - 1)), row_num)
+            (test_delete_random_guest(database_service), row_num)
         )
 
-    # Initialize measurement dictionaries
-    measurements = {key: [] for key in [
-        'insert', 'update', 'select_all', 'select_by_id',
-        'select_by_first_name', 'select_by_last_name', 'delete'
-    ]}
+        # Complex queries
+        measurements['select_calls_by_date'].append(
+            (test_select_calls_by_date(database_service), row_num)
+        )
+        measurements['select_calls_by_participants'].append(
+            (test_select_calls_by_participants(database_service), row_num)
+        )
+        measurements['select_groups_with_john'].append(
+            (test_select_groups_with_john(database_service), row_num)
+        )
+        measurements['select_phone_plus_one'].append(
+            (test_select_phone_plus_one(database_service), row_num)
+        )
+        measurements['select_email_org'].append(
+            (test_select_email_org(database_service), row_num)
+        )
+        measurements['select_phone_plus_one_limit'].append(
+            (test_select_phone_plus_one_limit(database_service), row_num)
+        )
+        measurements['select_email_org_limit'].append(
+            (test_select_email_org_limit(database_service), row_num)
+        )
 
-    measurements_w_idx = {key: [] for key in [
-        'insert', 'update', 'select_all', 'select_by_id',
-        'select_by_first_name', 'select_by_last_name', 'delete'
-    ]}
 
-    row_nums = [1000, 10000, 100000, 1000000]
+    measurement_keys = [
+        'insert', 'update', 'delete',
+        'select_calls_by_date', 'select_calls_by_participants',
+        'select_groups_with_john', 'select_phone_plus_one',
+        'select_email_org', 'select_phone_plus_one_limit',
+        'select_email_org_limit'
+    ]
+
+    measurements = {key: [] for key in measurement_keys}
+    measurements_w_idx = {key: [] for key in measurement_keys}
+
+    row_nums = [1000]
 
     for row_num in row_nums:
         database_service.load_csv(row_num)

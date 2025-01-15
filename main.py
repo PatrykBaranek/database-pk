@@ -4,7 +4,6 @@ from postgres.perf_test.test_query import measure_postgres_times
 from mongo.database.mongodb_executor import MongoDBExecutor
 from mongo.perf_test.test_query import measure_mongo_times
 
-
 # ['insert', 'update', 'select_all', 'select_by_id', 'select_by_first_name', 'select_by_last_name', 'delete']
 def main():
     postgres_executor = PostgresExecutor('postgres', 'postgres', 'postgres', 'localhost', '5433')
@@ -12,9 +11,10 @@ def main():
     postgres_executor.create_tables()
     postgres, postgres_w_idx = measure_postgres_times(postgres_executor)
 
-    mongo_service = MongoDBExecutor('Performance', 'localhost', '27017')
+    mongo_service = MongoDBExecutor('mongo', 'localhost', '27017')
+    mongo_service.delete_all_collections()
     mongo_service.create_collections()
-    mongo, mongo_w_idx = measure_mongo_times(mongo_service)
+    mongo, mongo_w_idx = measure_mongo_times(mongo_service) # key się zmieniły podczas zmiany query!!!!!111!!!
 
     plot_result(postgres['insert'], mongo['insert'], 'Postgres vs MongoDB insert')
     plot_result(postgres['update'], mongo['update'], 'Postgres vs MongoDB update')

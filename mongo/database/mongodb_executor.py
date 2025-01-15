@@ -74,30 +74,30 @@ class MongoDBExecutor:
                 return {
                     "_id": row['id'],
                     "duration": int(row['duration']),
-                    "call_date": datetime.fromisoformat(row['call_date'])
+                    "call_date": datetime.fromisoformat(row['call_date']),
                 }
 
             # Load main collections
             load_csv_to_collection(
-                f'../../../common/data/contacts{row_num}.csv',
+                f'common/data/contacts{row_num}.csv',
                 'contacts',
                 transform_contact
             )
 
             load_csv_to_collection(
-                f'../../../common/data/groups{row_num}.csv',
+                f'common/data/groups{row_num}.csv',
                 'groups',
                 transform_group
             )
 
             load_csv_to_collection(
-                f'../../../common/data/calls{row_num}.csv',
+                f'common/data/calls{row_num}.csv',
                 'calls',
                 transform_call
             )
 
             # Process relationships
-            with open(f'../../../common/data/contact_groups{row_num}.csv', 'r') as file:
+            with open(f'common/data/contact_groups{row_num}.csv', 'r') as file:
                 reader = csv.DictReader(file)
                 for row in reader:
                     # Update contact's groups
@@ -109,6 +109,20 @@ class MongoDBExecutor:
                     self.db.groups.update_one(
                         {"_id": row['group_id']},
                         {"$push": {"members": row['contact_id']}}
+                    )
+
+            with open(f'common/data/contact_calls{row_num}.csv', 'r') as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    # Update contact's calls
+                    self.db.contacts.update_one(
+                        {"_id": row['contact_id']},
+                        {"$push": {"calls": row['call_id']}}
+                    )
+                    # Update call's participants
+                    self.db.calls.update_one(
+                        {"_id": row['call_id']},
+                        {"$push": {"participants": row['contact_id']}}
                     )
 
         except Exception as error:
@@ -152,30 +166,31 @@ class MongoDBExecutor:
         finally:
             self.close()
 
-    def execute_query_with_timing(self, collection_name, query, operation='find'):
+    def execute_query_with_timing(self, collection_name, query_func):
         """Execute MongoDB query and measure execution time"""
         try:
             self.connect()
+            collection = self.db[collection_name]
 
             start_time = time.time()
-
-            collection = self.db[collection_name]
-            if operation == 'find':
-                result = collection.find(query)
-                # Materialize the cursor to get actual execution time
-                list(result)
-            elif operation == 'aggregate':
-                result = collection.aggregate(query)
-                # Materialize the cursor to get actual execution time
-                list(result)
-            elif operation == 'update':
-                result = collection.update_many(query[0], query[1])
-            elif operation == 'delete':
-                result = collection.delete_many(query)
-
+            query_func(collection)
             end_time = time.time()
 
             return end_time - start_time
+
+        except Exception as error:
+            print(f"Error: {error}")
+        finally:
+            self.close()
+
+    def delete_all_collections(self):
+        """Delete all collections in the database"""
+        try:
+            self.connect()
+
+            self.db.contacts.drop()
+            self.db.groups.drop()
+            self.db.calls.drop()
 
         except Exception as error:
             print(f"Error: {error}")
@@ -195,7 +210,6 @@ class MongoDBExecutor:
                     "properties": {
                         "email": {
                             "bsonType": "string",
-                            "pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
                         },
                         "phone_number": {
                             "bsonType": "string"
