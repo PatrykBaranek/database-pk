@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 def plot_result(postgres_result, mongo_result, title):
     postgres_times, postgres_rows = zip(*postgres_result)
-    mongo_times, mongo_rows = zip(*postgres_result)
+    mongo_times, mongo_rows = zip(*mongo_result)
 
     fig, ax = plt.subplots()
 

@@ -44,6 +44,7 @@ class MongoDBExecutor:
                             self.db[collection_name].insert_many(documents)
                             documents = []
 
+
                     # Insert remaining documents
                     if documents:
                         self.db[collection_name].insert_many(documents)
@@ -175,7 +176,7 @@ class MongoDBExecutor:
             start_time = time.time()
             query_func(collection)
             end_time = time.time()
-
+            print(f"Query execution time: {end_time - start_time} seconds")
             return end_time - start_time
 
         except Exception as error:

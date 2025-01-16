@@ -31,29 +31,56 @@ def test_delete(database_service: PostgresExecutor, id: int):
 
 def measure_postgres_times(database_executor: PostgresExecutor):
     def perform_measurements(measurements, row_num):
-        measurements['insert'].append((test_insert(database_executor, row_num + 1), row_num))
-        measurements['update'].append((test_update(database_executor), row_num))
-        measurements['select_all'].append(
-            (database_executor.execute_query_with_timing("SELECT * FROM contacts"), row_num))
-        measurements['select_by_id'].append(
-            (database_executor.execute_query_with_timing("SELECT * FROM contacts WHERE id = 1"), row_num))
-        measurements['select_by_first_name'].append(
-            (database_executor.execute_query_with_timing("SELECT * FROM contacts WHERE first_name = 'John'"), row_num))
-        measurements['select_by_last_name'].append(
-            (database_executor.execute_query_with_timing("SELECT * FROM contacts WHERE last_name = 'Doe'"), row_num))
-        measurements['delete'].append((test_delete(database_executor, row_num + 1), row_num))
+        # CRUD operations
+        measurements['insert'].append(
+            (test_insert(database_executor, row_num + 1), row_num)
+        )
+        measurements['update'].append(
+            (test_update(database_executor), row_num)
+        )
+        measurements['delete'].append(
+            (test_delete(database_executor, row_num + 1), row_num)
+        )
+        measurements['select_calls_by_date'].append(
+            (database_executor.execute_query_with_timing("SELECT * FROM calls WHERE call_date = '2025-01-03';"), row_num)
+        )
+        measurements['select_calls_by_participants'].append(
+            (database_executor.execute_query_with_timing("SELECT c.* FROM calls c JOIN Contacts_Calls cc ON c.id = cc.call_id GROUP BY c.id HAVING COUNT(cc.contact_id) > 5;"), row_num)
+        )
+        measurements['select_groups_with_john'].append(
+            (database_executor.execute_query_with_timing("SELECT * FROM contacts WHERE first_name = 'John'"), row_num)
+        )
+        measurements['select_phone_plus_one'].append(
+            (database_executor.execute_query_with_timing("SELECT * FROM contacts WHERE phone_number ~ '^\\+1'"), row_num)
+        )
+        measurements['select_email_org'].append(
+            (database_executor.execute_query_with_timing("SELECT * FROM contacts WHERE email ~ 'org$'"), row_num)
+        )
+        measurements['select_phone_plus_one_limit'].append(
+            (database_executor.execute_query_with_timing("SELECT * FROM contacts WHERE phone_number ~ '^\\+1' LIMIT 5"), row_num)
+        )
+        measurements['select_email_org_limit'].append(
+            (database_executor.execute_query_with_timing("SELECT * FROM contacts WHERE email ~ 'org$' LIMIT 5"), row_num)
+        )
 
-    measurements = {key: [] for key in
-                    ['insert', 'update', 'select_all', 'select_by_id', 'select_by_first_name', 'select_by_last_name',
-                     'delete']}
-    measurements_w_idx = {key: [] for key in ['insert', 'update', 'select_all', 'select_by_id', 'select_by_first_name',
-                                              'select_by_last_name', 'delete']}
+    measurement_keys = [
+        'insert', 'update', 'delete',
+        'select_calls_by_date', 'select_calls_by_participants',
+        'select_groups_with_john', 'select_phone_plus_one',
+        'select_email_org', 'select_phone_plus_one_limit',
+        'select_email_org_limit'
+    ]
+
+    measurements = {key: [] for key in measurement_keys}
+    measurements_w_idx = {key: [] for key in measurement_keys}
+
     row_nums = [1000]
 
     for row_num in row_nums:
-        database_executor.create_tables()
+        database_executor.drop_all()
         database_executor.create_tables()
         database_executor.load_csv(row_num)
+
         perform_measurements(measurements, row_num)
 
         database_executor.create_indexes()
@@ -61,4 +88,3 @@ def measure_postgres_times(database_executor: PostgresExecutor):
         database_executor.drop_indexes()
 
     return measurements, measurements_w_idx
-
