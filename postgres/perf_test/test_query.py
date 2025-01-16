@@ -1,5 +1,7 @@
 from datetime import datetime
 from faker import Faker
+
+from common.constants import NUMBERS_OF_ROWS
 from postgres.database.postgres_executor import PostgresExecutor
 
 
@@ -74,7 +76,7 @@ def measure_postgres_times(database_executor: PostgresExecutor):
     measurements = {key: [] for key in measurement_keys}
     measurements_w_idx = {key: [] for key in measurement_keys}
 
-    row_nums = [1000]
+    row_nums = NUMBERS_OF_ROWS
 
     for row_num in row_nums:
         database_executor.drop_all()

@@ -1,5 +1,7 @@
 from datetime import datetime
 from faker import Faker
+
+from common.constants import NUMBERS_OF_ROWS
 from mongo.database.mongodb_executor import MongoDBExecutor
 
 
@@ -134,7 +136,7 @@ def measure_mongo_times(database_service: MongoDBExecutor):
     measurements = {key: [] for key in measurement_keys}
     measurements_w_idx = {key: [] for key in measurement_keys}
 
-    row_nums = [1000]
+    row_nums = NUMBERS_OF_ROWS
 
     for row_num in row_nums:
         database_service.load_csv(row_num)

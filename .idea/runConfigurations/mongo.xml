@@ -2,7 +2,7 @@
   <configuration default="false" name="mongo" type="docker-deploy" factoryName="docker-image" server-name="Docker">
     <deployment type="docker-image">
       <settings>
-        <option name="imageTag" value="mongo" />
+        <option name="imageTag" value="mongo:4.4.6" />
         <option name="containerName" value="ztbd" />
         <option name="portBindings">
           <list>
@@ -12,7 +12,6 @@
             </DockerPortBindingImpl>
           </list>
         </option>
-        <option name="commandLineOptions" value="" />
       </settings>
     </deployment>
     <method v="2" />

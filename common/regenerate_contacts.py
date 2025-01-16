@@ -33,8 +33,15 @@ def regenerate_contact_groups_and_calls(num_contacts, num_groups, num_calls, fil
 
 
 regenerate_contact_groups_and_calls(
-    100000,
-    100000,
-    100000,
+    50000,
+        50000,
+        50000,
+        100000
+)
+
+regenerate_contact_groups_and_calls(
+    300000,
+    300000,
+    300000,
     1000000
 )
